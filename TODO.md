@@ -179,7 +179,17 @@ asks, using the existing recipes as the template:
       `windows` CI runner) and confirm it executes. Arch + symbol + libSystem
       evidence is conclusive that it's a valid image, but execution closes it.
 
-## zlib fetch is FLAKY — `zlib.net/fossils` is a mutable URL (pin an immutable mirror)
+## zlib fetch is FLAKY — `zlib.net/fossils` is a mutable URL (pin an immutable mirror) — FIXED 2026-09-07
+
+**FIXED:** `deps.lock` now pins zlib to the immutable GitHub release asset
+`https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz`.
+The GitHub asset hashes to the SAME `9a93b2b7…` as the old zlib.net/fossils
+tarball (byte-identical 1.3.1 source), so ONLY the URL changed — verified via
+`scripts/pin-hashes.sh` (all deps still resolve, zlib sha unchanged). This
+removes the only mutable-URL dep; the intermittent `zlib checksum mismatch`
+flake is gone.
+
+---
 
 **Reported by:** the aeo line, 2026-09-07. Non-deterministically breaks FreeBSD
 cross-builds that need zlib (openssl links it; aeo's CLI freebsd bundle was
