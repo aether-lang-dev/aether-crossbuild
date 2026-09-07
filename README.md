@@ -55,6 +55,9 @@ Four libraries × eight targets. The targets split into two tiers by effort:
 # Build all four deps for one target into ./sysroots/<triple>/
 ./provision.sh aarch64-macos
 
+# Confirm each staged lib actually LINKS (not just "right arch"):
+./scripts/verify.sh aarch64-macos
+
 # ...or every target in the matrix (slow — openssl dominates):
 ./provision.sh --all
 
@@ -112,6 +115,8 @@ recipes/
 ├── zlib.sh   pcre2.sh   nghttp2.sh   openssl.sh
 scripts/
 ├── get-zig.sh            # fetch+verify the pinned zig tarball
-└── fetch-freebsd-base.sh # extract FreeBSD base.txz into ./bases/<cpu>-freebsd/
+├── fetch-freebsd-base.sh # extract FreeBSD base.txz into ./bases/<cpu>-freebsd/
+├── pin-hashes.sh         # print each deps.lock URL's real sha256 (keep the lock honest)
+└── verify.sh             # verify.sh <triple>: link a probe using each staged lib
 WHY-NOT-PUBLISHED.md      # the licensing boundary — read before adding a release
 ```

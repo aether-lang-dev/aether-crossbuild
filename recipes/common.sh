@@ -18,13 +18,16 @@
 set -eu
 
 # --- directories (ROOT is the repo root; recipes are one level down) ----------
-_here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-# When sourced from provision.sh, $0 is provision.sh at ROOT; when a recipe is
-# run standalone, $0 is the recipe in recipes/. Resolve ROOT either way.
-case "$_here" in
-    */recipes) ROOT=$(dirname -- "$_here") ;;
-    *)         ROOT="$_here" ;;
-esac
+# A caller that already knows the repo root (e.g. scripts/verify.sh, one level
+# down like recipes/) can export ROOT before sourcing this file; honour it.
+# Otherwise derive from $0: provision.sh sits at ROOT, a recipe in recipes/.
+if [ -z "${ROOT:-}" ]; then
+    _here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+    case "$_here" in
+        */recipes) ROOT=$(dirname -- "$_here") ;;
+        *)         ROOT="$_here" ;;
+    esac
+fi
 export ROOT
 WORK="$ROOT/work"
 SYSROOTS="$ROOT/sysroots"

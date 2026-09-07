@@ -167,13 +167,25 @@ asks, using the existing recipes as the template:
 
 - [ ] **nghttp2 for freebsd/windows**: confirm `--without-*` flags still suffice
       (no accidental libxml2/jansson/openssl pickup from the target sysroot).
+      `scripts/verify.sh` now covers the link half automatically wherever
+      nghttp2 is staged (its probe calls `nghttp2_version`); still open is
+      staging nghttp2 for those targets (freebsd nghttp2 is deferred on a
+      per-lib header port, see the FreeBSD section).
 - [ ] **Parallelism**: `provision.sh --all` builds targets serially; openssl
       dominates each. A `-jN`-across-targets mode could cut wall-clock on a big
       agent, but keep logs per-target legible.
-- [ ] **A `verify.sh`**: after `provision.sh <triple>`, link a trivial
-      Aether/C program that actually *uses* each lib (e.g. a pcre2 match, an
-      openssl hash) against the sysroot and confirm it links `NOUNDEFS`. Closes
-      the gap between "archive has the right arch" and "it actually links."
+- [x] **A `verify.sh`** — DONE (2026-09-07). `scripts/verify.sh <triple>`: for
+      each staged lib, compiles a tiny C probe that calls a real function
+      (zlibVersion / pcre2_compile / EVP_* / nghttp2_version / sqlite3_*), links
+      it by absolute archive path against the sysroot through the same zig
+      wrapper provision.sh uses, and confirms a binary was produced with the
+      symbols resolved. Links only (a cross binary can't run on the Linux host).
+      Proven on x86_64-freebsd15 (zlib+pcre2+openssl), x86_64-linux-gnu
+      (zlib+pcre2+sqlite), x86_64-windows (COFF/PE: zlib+pcre2+sqlite). It
+      caught a real one on Windows — pcre2's header defaults to
+      `__declspec(dllimport)`, so a static link needs `-DPCRE2_STATIC` (the
+      probe sets it; harmless elsewhere), exactly the "right arch but won't
+      link" gap this closes.
 - [ ] **Run-on-hardware proof**: the one check no Linux agent can do — launch a
       linked mac-arm64 / windows binary on real hardware (or a `macos-14` /
       `windows` CI runner) and confirm it executes. Arch + symbol + libSystem
