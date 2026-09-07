@@ -28,7 +28,7 @@ duktape                2.7.0    https://duktape.org/duktape-2.7.0.tar.xz  90f8d2
 
 # Toolchain (fetched by scripts/get-zig.sh; kept here so the version is pinned
 # in one place). Update ZIG_* together.
-zig                    0.13.0   https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz  d45312e61ebcc48032b77bc4cf7fd6915c11fa16e4aad116b66c9468211230ea
+zig                    0.16.0   https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz  70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00
 
 # FreeBSD base sysroot (fetched by scripts/fetch-freebsd-base.sh). One entry per
 # CPU (the default the script picks by arch), PLUS optional version-suffixed

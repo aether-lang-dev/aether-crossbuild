@@ -24,7 +24,7 @@ else
     echo "WARNING: zig sha is PIN_ME — skipping checksum (run scripts/pin-hashes.sh)" >&2
 fi
 
-# extract (idempotent): produces toolchain/zig-linux-x86_64-<ver>/zig
+# extract (idempotent): produces toolchain/zig-<arch>-<os>-<ver>/zig (zig 0.16+ naming; older zig was <os>-<arch>)
 tar xf "$tar" -C "$TOOLCHAIN"
 z=$(find "$TOOLCHAIN" -maxdepth 2 -name zig -type f | head -1)
 [ -n "$z" ] || { echo "zig binary not found after extract" >&2; exit 1; }
