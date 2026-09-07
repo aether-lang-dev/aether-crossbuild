@@ -178,3 +178,34 @@ asks, using the existing recipes as the template:
       linked mac-arm64 / windows binary on real hardware (or a `macos-14` /
       `windows` CI runner) and confirm it executes. Arch + symbol + libSystem
       evidence is conclusive that it's a valid image, but execution closes it.
+
+## zlib fetch is FLAKY — `zlib.net/fossils` is a mutable URL (pin an immutable mirror)
+
+**Reported by:** the aeo line, 2026-09-07. Non-deterministically breaks FreeBSD
+cross-builds that need zlib (openssl links it; aeo's CLI freebsd bundle was
+dropped from the aeo v0.2.0 release because of this — twice).
+
+**Symptom:** `provision.sh` fails at zlib with
+`✗ zlib checksum mismatch: got <X> want 9a93b2b7…`. Seen with TWO different
+"got" hashes across runs:
+- `300594da9d83883ac75ec5f47ef696fe955f8d31eed8a84870f87a09452f0ba7`
+- `085caa66962369209d57d758deb61e3db1a0060ce54bb3354e4db0aa32c21ca0`
+
+**Cause:** `deps.lock` pins zlib to
+`https://zlib.net/fossils/zlib-1.3.1.tar.gz` — a **mutable** URL. zlib.net
+re-generates the fossils tarball (recompression/repackaging), so its sha256
+drifts while our pin stays fixed → the verify fails intermittently. (Two
+different got-hashes = the source is mutating, not transit corruption.) Note the
+OTHER three deps (pcre2, nghttp2, openssl) all use **GitHub release-download**
+URLs, which are immutable — only zlib uses the flaky host.
+
+**Fix (one deps.lock line):** point zlib at the immutable GitHub release asset,
+same 1.3.1 source:
+`https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz`
+Then set that entry's sha256 from `scripts/pin-hashes.sh` (it prints the real
+sha for every deps.lock URL). Verify the new tarball builds (`provision.sh
+x86_64-freebsd15`) before committing. If madler's asset hashes to the SAME
+9a93b2b7… as the current pin, only the URL changes.
+
+Low-risk, matches the sibling deps' pattern, and removes the only mutable-URL
+dep. Until then, a failed aeo FreeBSD bundle is just this flake — re-run.
