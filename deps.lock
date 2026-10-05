@@ -41,3 +41,9 @@ freebsd-base-aarch64   14.3     https://download.freebsd.org/releases/arm64/aarc
 # Extracted to bases/<cpu>-freebsd15/. sha self-verified against a fresh fetch
 # 2026-07-20 (no CHECKSUM.SHA256 published at that mirror path).
 freebsd-base-x86_64-15    15.0     https://download.freebsd.org/releases/amd64/15.0-RELEASE/base.txz  ac0c933cc02ee8af4da793f551e4a9a15cdcf0e67851290b1e8c19dd6d30bba8
+
+# Android NDK (fetched by scripts/fetch-android-sysroot.sh, which extracts only
+# the sysroot slice: bionic headers, crt*.o and libc stubs, static libs, and the
+# NOTICE files). zig cc names the Android target but ships no bionic; with this
+# sysroot, `ae build --target=aarch64-linux-android` needs nothing else.
+android-ndk            r27c     https://dl.google.com/android/repository/android-ndk-r27c-linux.zip  59c2f6dc96743b5daf5d1626684640b20a6bd2b1d85b13156b90333741bad5cc

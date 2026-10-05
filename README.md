@@ -46,6 +46,27 @@ Four libraries × eight targets. The targets split into two tiers by effort:
 > version rides the base-sysroot dir only; the compiler triple stays
 > `x86_64-freebsd`.
 
+## Android: a sysroot, not a deps build
+
+`ae build --target=aarch64-linux-android` (Aether 0.779+) cross-builds for
+Android (bionic) with zig alone. zig names the target but ships no bionic, so
+it needs the NDK's sysroot, and only that: the headers, the crt objects and the
+libc/libm/libdl stubs for one API level, about 38 MB. `fetch-android-sysroot.sh`
+takes it from the NDK zip pinned in `deps.lock` (sha256-checked, fetched once
+into `work/downloads/`) and leaves the rest of the 2 GB NDK unpacked nowhere:
+
+```sh
+./scripts/fetch-android-sysroot.sh aarch64        # API 29 -> ./bases/aarch64-android29/
+AETHER_SYSROOT=$PWD/bases/aarch64-android29 ae build --target=aarch64-linux-android app.ae
+```
+
+A higher minimum Android is `fetch-android-sysroot.sh aarch64 33` with
+`AETHER_ANDROID_API=33`. It needs `python3` (for the zip) and runs on macOS or
+Linux. The sysroot's licences travel with it as `NOTICE.android-ndk*`: bionic
+is BSD/Apache-2.0 from AOSP, libc++ Apache-2.0 with the LLVM exception, zlib
+the zlib licence. The Tier-2 deps (openssl, nghttp2, ...) are not built for
+Android yet; those std features stub out, as on any target without them.
+
 ## Usage
 
 ```sh
@@ -116,6 +137,7 @@ recipes/
 scripts/
 ├── get-zig.sh            # fetch+verify the pinned zig tarball
 ├── fetch-freebsd-base.sh # extract FreeBSD base.txz into ./bases/<cpu>-freebsd/
+├── fetch-android-sysroot.sh # extract the NDK's sysroot into ./bases/<cpu>-android<api>/
 ├── pin-hashes.sh         # print each deps.lock URL's real sha256 (keep the lock honest)
 └── verify.sh             # verify.sh <triple>: link a probe using each staged lib
 WHY-NOT-PUBLISHED.md      # the licensing boundary — read before adding a release
